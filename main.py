@@ -1,6 +1,7 @@
 import pygame as pg, asyncio, sys
 from os.path import join, dirname, abspath
 from PIL import Image
+import random
 
 pg.init()
 
@@ -95,15 +96,21 @@ class Player:
 
 
 class Cactus:
-    def __init__(self, x):
+    def __init__(self, x, zone):
         self.image = cactus_surf
-        self.rect = self.image.get_rect(midbottom=(x, SCREEN_HEIGHT - 20))
+        
+        if zone == 1:  
+            self.rect = self.image.get_rect(midbottom=(x, SCREEN_HEIGHT - 30))
+        elif zone == 2:  
+            self.rect = self.image.get_rect(midbottom=(x, SCREEN_HEIGHT - 70))
+        elif zone == 3:  
+            self.rect = self.image.get_rect(midbottom=(x, SCREEN_HEIGHT - 120))
+        elif zone == 4:  
+            self.rect = self.image.get_rect(midbottom=(x, SCREEN_HEIGHT - 160))
         self.mask = pg.mask.from_surface(self.image)  # Создаем маску
 
     def move(self):
         self.rect.x -= SPEED
-        if self.rect.right < 0:
-            self.rect.left = SCREEN_WIDTH
 
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -112,7 +119,8 @@ class Cactus:
 async def main():
     clock = pg.time.Clock()
     player = Player()
-    cacti = [Cactus(SCREEN_WIDTH + i * 300) for i in range(3)]
+    cacti = []
+    spawn_timer = 0
     score = 0
 
     waiting_for_start = True
@@ -149,7 +157,7 @@ async def main():
                 if game_over:
                     game_over = False
                     player = Player()
-                    cacti = [Cactus(SCREEN_WIDTH + i * 300) for i in range(3)]
+                    cacti = []
                     score = 0
 
         keys = pg.key.get_pressed()
@@ -159,11 +167,22 @@ async def main():
         if not game_over:
             player.apply_gravity()
             player.update()
-            for cactus in cacti:
-                cactus.move()
 
-            # Проверка столкновений с использованием масок
-            for cactus in cacti:
+            
+            spawn_timer += 1.5
+            if spawn_timer > random.randint(60, 120):  
+                for _ in range(random.randint(0, 1)): 
+                    x_position = SCREEN_WIDTH + random.randint(0, 300)  
+                    zone = random.randint(1, 2)  # Случайная зона
+                    cacti.append(Cactus(x_position, zone))
+                spawn_timer = 0
+
+            for cactus in cacti[:]:
+                cactus.move()
+                if cactus.rect.right < 0:
+                    cacti.remove(cactus)
+
+                # Проверка столкновений
                 offset = (
                     cactus.rect.x - player.rect.x,
                     cactus.rect.y - player.rect.y,
@@ -196,3 +215,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
