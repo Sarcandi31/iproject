@@ -12,7 +12,7 @@ app.wsgi_app = ProxyFix(
 BASE_DIR = Path(__file__).parent
 app.config.update(
     GAMES_DIR=BASE_DIR / "games",
-    ASSETS_DIR=BASE_DIR / "assets",
+    ASSETS_DIR=BASE_DIR / "static" / "assets",
     DEFAULT_ICON="default-game-icon.png",
     SITE_TITLE="Игровой портал от Sarcandi",
     GITHUB_URL="https://github.com/Sarcandi",
@@ -44,8 +44,7 @@ def get_game_title(game_dir: Path) -> str:
     return game_dir.name
 
 
-def get_games_list() -> list:
-    """Возвращает отсортированный список игр"""
+def get_games_list():
     games_dir = app.config["GAMES_DIR"]
     if not games_dir.is_dir():
         raise FileNotFoundError("Директория с играми не найдена")
@@ -53,15 +52,30 @@ def get_games_list() -> list:
     games = []
     for item in games_dir.iterdir():
         if item.is_dir() and not item.name.startswith("."):
+            game_title = get_game_title(item)
+
+            # Проверяем наличие файла telegram.txt
+            telegram_file = item / "telegram.txt"
+            telegram_id = None
+            if telegram_file.exists():
+                try:
+                    with open(telegram_file, "r", encoding="utf-8") as f:
+                        telegram_id = f.read().strip()
+                        # Удаляем все нецифровые символы на случай, если ввели полную ссылку
+                        telegram_id = "".join(filter(str.isdigit, telegram_id))
+                except:
+                    pass
+
             games.append(
                 {
                     "dir_name": item.name,
-                    "title": get_game_title(item),
+                    "title": game_title,
                     "author": item.name,
+                    "telegram_id": telegram_id,  # Используем только цифровой ID
                 }
             )
 
-    return sorted(games, key=lambda x: x["title"].casefold())
+    return sorted(games, key=lambda x: x["title"].casefold()) if games else []
 
 
 @app.route("/")
@@ -117,5 +131,5 @@ def inject_utilities():
 
 if __name__ == "__main__":
     app.run(
-        host="localhost", port=8000, debug=False
+        host="localhost", port=8000, debug=True
     )  # В production debug=False!
