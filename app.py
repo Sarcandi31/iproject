@@ -131,5 +131,5 @@ def inject_utilities():
 
 if __name__ == "__main__":
     app.run(
-        host="localhost", port=8000, debug=True
+        host="localhost", port=8000, debug=False
     )  # В production debug=False!
