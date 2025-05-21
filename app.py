@@ -15,6 +15,7 @@ app.config.update(
     ASSETS_DIR=BASE_DIR / "static" / "assets",
     DEFAULT_ICON="default-game-icon.png",
     SITE_TITLE="Игровой портал от Sarcandi",
+    PROJECT_GITHUB_URL="https://github.com/Sarcandi31/iproject",
     GITHUB_URL="https://github.com/Sarcandi",
     TELEGRAM_URL="https://t.me/sarcandi",
     MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # Ограничение загрузки 16MB
@@ -85,7 +86,6 @@ def index():
         games = get_games_list()
         if not games:
             return render_template("empty.html", config=app.config)
-
         return render_template("index.html", games=games, config=app.config)
     except Exception as e:
         logger.error(f"Ошибка в index: {e}")
@@ -109,6 +109,11 @@ def serve_asset(filename: str):
     return send_from_directory(app.config["ASSETS_DIR"], filename)
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
+
+
 @app.context_processor
 def inject_utilities():
     """Добавляет утилиты в контекст шаблонов"""
@@ -124,6 +129,7 @@ def inject_utilities():
     return {
         "get_game_icon": get_game_icon,
         "site_title": app.config["SITE_TITLE"],
+        "project_github_url": app.config["PROJECT_GITHUB_URL"],
         "github_url": app.config["GITHUB_URL"],
         "telegram_url": app.config["TELEGRAM_URL"],
     }
