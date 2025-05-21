@@ -1,18 +1,29 @@
 <!DOCTYPE html>
-<html lang="ru" class="dark-theme">
+<html lang="ru">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>{{ site_title }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Применяем тему до загрузки CSS (FOUT prevention)
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark-theme');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body>
+<body class="{% if current_theme == 'dark' %}dark-theme{% endif %}">
     <div class="container">
         <header>
             <h1>{{ site_title }}</h1>
@@ -25,13 +36,21 @@
         </header>
 
         <div class="social-links">
-            <a href="{{ github_url }}" target="_blank" class="social-link" rel="noopener noreferrer">
-                <i class="fab fa-github"></i>
-                <span>GitHub</span>
-            </a>
-            <a href="{{ telegram_url }}" target="_blank" class="social-link" rel="noopener noreferrer">
+            <!-- Остальные социальные ссылки (Telegram и т.д.) -->
+            <a href="{{ config.TELEGRAM_URL }}" class="social-link" target="_blank" rel="noopener noreferrer">
                 <i class="fab fa-telegram"></i>
-                <span>Telegram</span>
+                <span>Мой Telegram</span>
+            </a>
+            <!-- Ссылка на профиль GitHub -->
+            <a href="{{ config.GITHUB_URL }}" class="social-link" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-github"></i>
+                <span>Мой GitHub</span>
+            </a>
+
+            <!-- Ссылка на проект GitHub -->
+            <a href="{{ config.PROJECT_GITHUB_URL }}" class="social-link" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-code-branch"></i>
+                <span>Исходный код</span>
             </a>
         </div>
 
