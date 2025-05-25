@@ -13,17 +13,7 @@
     --backdrop-blur: blur(12px);
 }
 
-.dark-theme {
-    --primary: #a78bfa;
-    --primary-hover: #8b5cf6;
-    --primary-transparent: rgba(167, 139, 250, 0.2);
-    --text: #f5f3ff;
-    --text-light: #a78bfa;
-    --bg: #0f0524;
-    --card-bg: rgba(30, 15, 60, 0.5);
-    --card-border: rgba(255, 255, 255, 0.1);
-    --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
+
 
 * {
     margin: 0;
@@ -37,10 +27,10 @@ body {
     color: var(--text);
     line-height: 1.5;
     min-height: 100vh;
+    overflow: hidden;
     padding: 2rem;
     transition: var(--transition);
-    background-image:
-        radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 0.1) 0px, transparent 50%),
+    background-image: radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 0.1) 0px, transparent 50%),
         radial-gradient(at 0% 50%, hsla(256, 100%, 65%, 0.15) 0px, transparent 50%);
 }
 
@@ -234,9 +224,25 @@ h1 {
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
+.dark-theme {
+    --primary: #a78bfa;
+    --primary-hover: #8b5cf6;
+    --primary-transparent: rgba(167, 139, 250, 0.2);
+    --text: #f5f3ff;
+    --text-light: #a78bfa;
+    --bg: #0f0524;
+    --card-bg: rgba(30, 15, 60, 0.5);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
 .dark-theme .error-message {
     background: rgba(239, 68, 68, 0.15);
     color: #fca5a5;
+}
+
+.dark-theme .error-subheading {
+    color: rgba(245, 243, 255, 0.8);
 }
 
 .error-container {
@@ -274,6 +280,21 @@ h1 {
     margin-bottom: 2rem;
 }
 
+.error-title {
+    font-size: 1.5rem !important;
+    /* Уменьшаем размер шрифта */
+    margin-bottom: 1rem !important;
+    background: linear-gradient(90deg, var(--primary), #c084fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.error-content h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
 .home-button {
     display: inline-flex;
     align-items: center;
@@ -293,15 +314,62 @@ h1 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.error-heading {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(90deg, var(--primary), #c084fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.error-subheading {
+    font-size: 1.2rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+
+
+
+.error-content h1.error-heading {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(90deg, var(--primary), #c084fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
 @media (max-width: 768px) {
     .games-list {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
+
+    .error-heading {
+        font-size: 2rem;
+    }
+
+    .error-content h1.error-heading {
+        font-size: 2rem;
+    }
 }
 
-@media (max-width: 480px) {
+/* @media (max-width: 480px) {
     body {
         padding: 1rem;
+    }
+
+    .error-heading {
+        font-size: 1.8rem;
+    }
+
+    .error-content h1.error-heading {
+        font-size: 1.8rem;
     }
 
     .games-list {
@@ -311,4 +379,4 @@ h1 {
     .theme-text {
         display: none;
     }
-}
+} */

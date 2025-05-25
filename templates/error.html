@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark only">
+    <title>{{ config.PROJECT_NAME }} - Внутренняя ошибка сервера</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('serve_css', filename='style.css') }}">
+</head>
+
+<body class="dark-theme">
+    <div class="container">
+        <header>
+            <h1>{{ config.SITE_TITLE }}</h1>
+        </header>
+
+        <div class="error-container">
+            <div class="error-content">
+                <h1 class="error-heading">Внутренняя ошибка сервера</h1>
+                <h2 class="error-subheading">Сообщите об ошибке или повторите попытку позже</h2>
+                <div class="social-links" style="justify-content: center; margin-top: 2rem;">
+                    <a href="{{ config.TELEGRAM_ERROR_URL }}" class="social-link" target="_blank"
+                        rel="noopener noreferrer">
+                        <i class="fab fa-telegram"></i>
+                        <span>Сообщить в Telegram</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

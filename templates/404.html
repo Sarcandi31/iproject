@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light dark">
-    <title>Страница не найдена | {{ site_title }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script>
-        // Применяем тему сразу в head, чтобы избежать мерцания
-        (function() {
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                document.documentElement.classList.add('dark-theme');
-            }
-        })();
-    </script>
+    <meta name="color-scheme" content="dark only">
+    <title>{{ config.PROJECT_NAME }} - Страница не существует</title>
+    <link rel="stylesheet" href="{{ url_for('serve_css', filename='404.css') }}">
 </head>
-<body>
-    <div class="container">
-        <div class="error-container">
-            <div class="error-content">
-                <h1>404</h1>
-                <p class="error-text">Страница, которую вы ищете, не существует или была перемещена.</p>
-                <a href="{{ url_for('index') }}" class="home-button">
-                    <i class="fas fa-home"></i> Вернуться на главную
-                </a>
-            </div>
+
+<body oncontextmenu="return false;">
+    <div class="app">
+        <a href="/" class="home-button">Вернуться на главную</a>
+        <div class="error">
+            404
+        </div>
+        <div class="img">
+            <img src="{{ url_for('serve_img', filename='okak.png') }}" alt="cat">
+            <h1 class="okak">ОКАК</h1>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('selectstart', function (e) {
+            if (e.target.className !== 'home-button') {
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('dragstart', function (e) {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
+
 </html>

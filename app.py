@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, url_for
+from flask import Flask, render_template, send_from_directory, url_for, request
 from pathlib import Path
 from werkzeug.middleware.proxy_fix import ProxyFix
 import logging
@@ -12,12 +12,14 @@ app.wsgi_app = ProxyFix(
 BASE_DIR = Path(__file__).parent
 app.config.update(
     GAMES_DIR=BASE_DIR / "games",
-    ASSETS_DIR=BASE_DIR / "static" / "assets",
+    ASSETS_DIR=Path(__file__).parent / "static" / "assets",
     DEFAULT_ICON="default-game-icon.png",
     SITE_TITLE="Игровой портал от Sarcandi",
+    PROJECT_NAME="IProject",
     PROJECT_GITHUB_URL="https://github.com/Sarcandi31/iproject",
     GITHUB_URL="https://github.com/Sarcandi",
     TELEGRAM_URL="https://t.me/sarcandi",
+    TELEGRAM_ERROR_URL="https://t.me/m/3x674PdLY2Fi",
     MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # Ограничение загрузки 16MB
 )
 
@@ -55,24 +57,11 @@ def get_games_list():
         if item.is_dir() and not item.name.startswith("."):
             game_title = get_game_title(item)
 
-            # Проверяем наличие файла telegram.txt
-            telegram_file = item / "telegram.txt"
-            telegram_id = None
-            if telegram_file.exists():
-                try:
-                    with open(telegram_file, "r", encoding="utf-8") as f:
-                        telegram_id = f.read().strip()
-                        # Удаляем все нецифровые символы на случай, если ввели полную ссылку
-                        telegram_id = "".join(filter(str.isdigit, telegram_id))
-                except:
-                    pass
-
             games.append(
                 {
                     "dir_name": item.name,
                     "title": game_title,
                     "author": item.name,
-                    "telegram_id": telegram_id,  # Используем только цифровой ID
                 }
             )
 
@@ -88,7 +77,7 @@ def index():
             return render_template("empty.html", config=app.config)
         return render_template("index.html", games=games, config=app.config)
     except Exception as e:
-        logger.error(f"Ошибка в index: {e}")
+        logger.error(f"Ошибка при загрузке основной страницы: {e}")
         return render_template("error.html", error=str(e)), 500
 
 
@@ -101,12 +90,56 @@ def serve_game(game: str, filename: str):
     return send_from_directory(game_dir, filename)
 
 
-@app.route("/assets/<path:filename>")
-def serve_asset(filename: str):
-    """Отдает статические файлы"""
-    if ".." in filename:
-        return "Not Found", 404
-    return send_from_directory(app.config["ASSETS_DIR"], filename)
+@app.route("/css/<path:filename>")
+def serve_css(filename):
+    return send_from_directory("static/css", filename)
+
+
+@app.route("/js/<path:filename>")
+def serve_js(filename):
+    return send_from_directory("static/js", filename)
+
+
+@app.route("/img/<path:filename>")
+def serve_img(filename):
+    return send_from_directory("static/image", filename)
+
+
+def is_mobile():
+    user_agent = request.headers.get("User-Agent", "").lower()
+    mobile_keywords = [
+        "iphone",
+        "android",
+        "ipod",
+        "blackberry",
+        "windows phone",
+    ]
+    return any(keyword in user_agent for keyword in mobile_keywords)
+
+
+@app.before_request
+def block_mobile():
+    # Разрешаем все запросы к статическим файлам (определяем по расширению)
+    if "." in request.path and request.path.rsplit(".", 1)[1].lower() in {
+        "css",
+        "js",
+        "png",
+        "jpg",
+        "jpeg",
+        "gif",
+        "ico",
+        "svg",
+        "woff",
+        "woff2",
+        "ttf",
+        "eot",
+    }:
+        return None
+
+    if is_mobile():
+        return render_template("mobile.html"), 403
+
+    return None
 
 
 @app.errorhandler(404)
@@ -114,28 +147,21 @@ def page_not_found(e):
     return render_template("404.html"), 404
 
 
-@app.context_processor
-def inject_utilities():
-    """Добавляет утилиты в контекст шаблонов"""
+@app.errorhandler(Exception)
+def handle_all_errors(e):
+    logger.error(f"Необработанная ошибка: {e}")
+    return render_template("error.html", error="Что-то пошло не так"), 500
 
-    def get_game_icon(game: str) -> str:
-        icon_path = app.config["GAMES_DIR"] / game / "icon.png"
-        return (
-            url_for("serve_game", game=game, filename="icon.png")
-            if icon_path.exists()
-            else url_for("serve_asset", filename=app.config["DEFAULT_ICON"])
-        )
 
-    return {
-        "get_game_icon": get_game_icon,
-        "site_title": app.config["SITE_TITLE"],
-        "project_github_url": app.config["PROJECT_GITHUB_URL"],
-        "github_url": app.config["GITHUB_URL"],
-        "telegram_url": app.config["TELEGRAM_URL"],
-    }
+@app.template_global()
+def get_game_icon(game: str) -> str:
+    icon_path = app.config["GAMES_DIR"] / game / "icon.png"
+    return (
+        url_for("serve_game", game=game, filename="icon.png")
+        if icon_path.exists()
+        else url_for("serve_img", filename=app.config["DEFAULT_ICON"])
+    )
 
 
 if __name__ == "__main__":
-    app.run(
-        host="localhost", port=8000, debug=False
-    )  # В production debug=False!
+    app.run(host="0.0.0.0", port=88, debug=True)
