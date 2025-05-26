@@ -107,14 +107,36 @@ def serve_img(filename):
 
 def is_mobile():
     user_agent = request.headers.get("User-Agent", "").lower()
+
+    # Проверяем стандартные мобильные ключи
     mobile_keywords = [
         "iphone",
-        "android",
+        "ipad",
         "ipod",
+        "android",
         "blackberry",
         "windows phone",
+        "mobile",
+        "tablet",
+        "kindle",
+        "silk",
     ]
-    return any(keyword in user_agent for keyword in mobile_keywords)
+
+    # Проверяем viewport (если включена "Версия для ПК", ширина все равно будет меньше)
+    viewport_width = request.headers.get("Viewport-Width", "")
+    is_small_viewport = viewport_width and int(viewport_width) < 1024
+
+    # Дополнительные проверки для обхода "Версии для ПК"
+    has_mobile_features = any(
+        keyword in user_agent for keyword in mobile_keywords
+    )
+
+    # Проверяем Touch Events API
+    touch_events = "ontouchstart" in request.headers.get(
+        "Sec-CH-UA-Features", ""
+    )
+
+    return has_mobile_features or is_small_viewport or touch_events
 
 
 @app.before_request
@@ -150,6 +172,12 @@ def page_not_found(e):
 @app.errorhandler(Exception)
 def handle_all_errors(e):
     logger.error(f"Необработанная ошибка: {e}")
+
+    # Проверяем, пришел ли запрос через error_page Nginx
+    original_uri = request.headers.get('X-Original-URI')
+    if original_uri:
+        logger.warning(f"Перенаправление с Nginx для URI: {original_uri}")
+
     return render_template("error.html", error="Что-то пошло не так"), 500
 
 
