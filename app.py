@@ -174,7 +174,7 @@ def handle_all_errors(e):
     logger.error(f"Необработанная ошибка: {e}")
 
     # Проверяем, пришел ли запрос через error_page Nginx
-    original_uri = request.headers.get('X-Original-URI')
+    original_uri = request.headers.get("X-Original-URI")
     if original_uri:
         logger.warning(f"Перенаправление с Nginx для URI: {original_uri}")
 
